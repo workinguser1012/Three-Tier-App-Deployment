@@ -31,6 +31,6 @@ jobs:
       run: |
         cd frontend
         npm install
-        npm test --if-present
+        CI=true npm test -- --passWithNoTests   # React to exit successfully if there are no tests.
 
   
