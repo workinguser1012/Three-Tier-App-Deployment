@@ -23,9 +23,9 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: public.ecr.aws/e0s8n6f1/three-tier-frontend:latest
+        image: public.ecr.aws/l9q3x7d5/three-tier-frontend:latest
         imagePullPolicy: Always
-        env:
+        env: 
           - name: REACT_APP_BACKEND_URL
             value: "backend:8080" # assuming backend service is on port 8080
         ports:
