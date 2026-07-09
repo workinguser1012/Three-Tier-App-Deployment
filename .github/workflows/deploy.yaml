@@ -14,24 +14,28 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v4               # Loads a Fresh Ubuntu Machine
 
     - name: Set up Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v4               # Downloads  Node Js Version 22
       with:
         node-version: '22'
 
     - name: Install and Test Backend
       run: |
-        cd backend
-        npm install
-        npm test --if-present
+        cd backend                                
+        npm install                        # NPM install means downloads all dependencies from package.json
+        npm test --if-present              # NPM test runs the test script if it exists and skip if it dosent without failing
 
     - name: Install and Test Frontend
       run: |
         cd frontend
         npm install
-        CI=true npm test -- --passWithNoTests   # React to exit successfully if there are no tests.
+        CI=true npm test -- --passWithNoTests    # Prevent CI from failing if no React tests exist yet , Sets CI= True
+
+
+
+
   push:
     runs-on: ubuntu-latest
     needs: build
@@ -64,3 +68,30 @@ jobs:
         push: true
         tags: public.ecr.aws/l9q3x7d5/three-tier-backend:${{ github.run_id }}
   
+  
+
+
+
+  update-k8s:
+    runs-on: ubuntu-latest
+    needs: push
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.TOKEN }}
+
+    - name: Update Frontend image tag
+      run: |
+        sed -i 's|image: public.ecr.aws/l9q3x7d5/three-tier-frontend:.*|image: public.ecr.aws/l9q3x7d5/three-tier-frontend:${{ github.run_id }}|' k8s_manifests/frontend-deployment.yaml
+
+    - name: Update Backend image tag
+      run: |
+        sed -i 's|image: public.ecr.aws/l9q3x7d5/three-tier-backend:.*|image: public.ecr.aws/l9q3x7d5/three-tier-backend:${{ github.run_id }}|' k8s_manifests/backend-deployment.yaml
+
+    - name: Commit and push updated tags
+      run: |
+        git config --global user.email "rageworking1210@gmail.com"
+        git config --global user.name "workinguser1012"
+        git add k8s_manifests/frontend-deployment.yaml k8s_manifests/backend-deployment.yaml
+        git commit -m "Update image tags to ${{ github.run_id }}"
+        git push      
