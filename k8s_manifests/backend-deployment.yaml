@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: public.ecr.aws/l9q3x7d5/three-tier-backend:29053975901
+        image: public.ecr.aws/l9q3x7d5/three-tier-backend:29054081074
         imagePullPolicy: Always
         env:
           - name: MONGO_CONN_STR
