@@ -32,5 +32,35 @@ jobs:
         cd frontend
         npm install
         CI=true npm test -- --passWithNoTests   # React to exit successfully if there are no tests.
+  push:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - uses: actions/checkout@v4
 
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Login to Amazon ECR Public
+      run: |
+        aws ecr-public get-login-password --region us-east-1 | \
+        docker login --username AWS --password-stdin public.ecr.aws
+
+    - name: Build and Push Frontend
+      uses: docker/build-push-action@v6
+      with:
+        context: ./frontend
+        push: true
+        tags: public.ecr.aws/l9q3x7d5/three-tier-frontend:${{ github.run_id }}
+
+    - name: Build and Push Backend
+      uses: docker/build-push-action@v6
+      with:
+        context: ./backend
+        push: true
+        tags: public.ecr.aws/l9q3x7d5/three-tier-backend:${{ github.run_id }}
   
