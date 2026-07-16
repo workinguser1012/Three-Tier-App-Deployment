@@ -101,7 +101,9 @@ Then point your manifests at the new image URIs:
 - `k8s_manifests/frontend_deployment.yml`
 - `k8s_manifests/backend_deployment.yml`
 
-![Pushing Docker images to ECR](assets/4.png)
+![Pushing Docker images to ECR](assets/16.png)
+
+![Pushing Docker images to ECR](assets/17.png)
 
 ![Push Commands For Backend ](assets/4.png)
 
