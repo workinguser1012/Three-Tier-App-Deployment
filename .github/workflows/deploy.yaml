@@ -1,5 +1,12 @@
 name: Three-Tier-App CI/CD
 
+concurrency:
+  group: three-tier-deploy
+  cancel-in-progress: false
+
+
+  
+
 on:
   push:
     branches:
@@ -93,8 +100,10 @@ jobs:
         git config --global user.email "rageworking1210@gmail.com"
         git config --global user.name "workinguser1012"
         git add k8s_manifests/frontend-deployment.yaml k8s_manifests/backend-deployment.yaml
-        git commit -m "Update image tags to ${{ github.run_id }}"
+        git commit -m "Update image tags to ${{ github.run_id }}" [skip ci]
         git push      
+
+
 
 
   deploy:
@@ -147,7 +156,7 @@ jobs:
           --role-name AmazonEKSLoadBalancerControllerRole \
           --attach-policy-arn=arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:policy/AWSLoadBalancerControllerIAMPolicy \
           --approve \
-          --region=us-east-1 || true
+          --region=us-east-1 
 
     - name: Install ALB Controller
       run: |
@@ -160,14 +169,11 @@ jobs:
           --set serviceAccount.name=aws-load-balancer-controller
       
     
-
     - name: Wait for ALB Controller to be ready
       run: |
         kubectl rollout status deployment/aws-load-balancer-controller \
           -n kube-system \
           --timeout=120s       
-
-
 
 
     - name: Deploy to EKS
