@@ -206,7 +206,6 @@ In your GitHub repo, go to **Settings → Secrets and variables → Actions** an
 **b. Add the workflow file**
 
 
-![GitHub Actions workflow run](assets/15.png)
 
 **c. Push and watch it run**
 
@@ -218,7 +217,7 @@ git push origin main
 
 Head over to the **Actions** tab in your repo to watch the pipeline build the images, push them to ECR, and roll the update out to your EKS deployments — no manual `kubectl apply` needed anymore.
 
-
+![GitHub Actions workflow run](assets/15.png)
 
 ---
 
