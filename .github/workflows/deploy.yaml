@@ -5,7 +5,7 @@ concurrency:
   cancel-in-progress: false
 
 
-  
+
 
 on:
   push:
@@ -100,7 +100,7 @@ jobs:
         git config --global user.email "rageworking1210@gmail.com"
         git config --global user.name "workinguser1012"
         git add k8s_manifests/frontend-deployment.yaml k8s_manifests/backend-deployment.yaml
-        git commit -m "Update image tags to ${{ github.run_id }}" [skip ci]
+        git commit -m "Update image tags to ${{ github.run_id }} [skip ci]"
         git push      
 
 

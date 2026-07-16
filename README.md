@@ -76,7 +76,7 @@ aws s3api create-bucket \
   --region us-east-1 
 ```
 
-![S3 bucket created with versioning enabled]  (<assets/Screenshot 2026-07-02 192656.png>)
+![S3 bucket created with versioning enabled](assets/2.png)
 
 
 ### Step 4 — Provision the Infrastructure
@@ -89,7 +89,7 @@ terraform init
 terraform apply --auto-approve
 ```
 
-![Terraform apply output]  (<assets/Screenshot 2026-07-02 193221.png>)
+![Terraform apply output](assets/3.png)
 
 
 ### Step 5 — Push Your Images to ECR
@@ -101,10 +101,15 @@ Then point your manifests at the new image URIs:
 - `k8s_manifests/frontend_deployment.yml`
 - `k8s_manifests/backend_deployment.yml`
 
-![Pushing Docker images to ECR] (<assets/Screenshot 2026-07-06 154917.png>)
+![Pushing Docker images to ECR](assets/4.png)
 
-(<assets/Screenshot 2026-07-06 155825.png>)  
-(<assets/Screenshot 2026-07-06 155825.png>)
+![Push Commands For Backend ](assets/4.png)
+
+![Push Commands For Backend](assets/5.png)
+
+![Push Commands For Frontend](assets/7.png)
+
+
 
 
 ### Step 6 — Deploy the App to EKS
@@ -122,7 +127,7 @@ kubectl apply -f k8s_manifests/backend-deployment.yaml -f k8s_manifests/backend-
 kubectl apply -f mongo/
 ```
 
-![Pods running in the workshop namespace]! (<assets/Screenshot 2026-07-07 170903.png>)
+![Pods running in the workshop namespace](assets/8.png)
 
 
 ### Step 7 — Wire Up the Load Balancer & Ingress
@@ -148,7 +153,7 @@ eksctl create iamserviceaccount \
   --region=us-east-1
 ```
 
-![IAM service account creation] (<assets/Screenshot 2026-07-07 171925.png>)
+![IAM Policy](assets/10.png)
 
 **b. Install Helm and the Load Balancer Controller**
 
@@ -164,7 +169,7 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   --set serviceAccount.name=aws-load-balancer-controller
 ```
 
-![Load Balancer Controller installed via Helm] (<assets/Screenshot 2026-07-07 180341.png>)
+![Load Balancer Controller installed via Helm](assets/11.png)
 
 ### Step 8 — Apply Ingress and Go Live
 
@@ -175,8 +180,10 @@ kubectl get ing -n workshop
 
 Grab the `ADDRESS` from the output and open it in your browser — your app should be live! 🎉
 
-![Application running live in the browser]   (<assets/Screenshot 2026-07-07 192104.png>)
-(<assets/Screenshot 2026-07-08 165847.png>)
+![Application Adress](assets/12.png)
+
+[Application Live](assets/13.png)
+
 
 
 
@@ -197,7 +204,7 @@ In your GitHub repo, go to **Settings → Secrets and variables → Actions** an
 **b. Add the workflow file**
 
 
-![GitHub Actions workflow run] (<assets/Screenshot 2026-07-16 112342.png>)
+![GitHub Actions workflow run](assets/15.png)
 
 **c. Push and watch it run**
 
