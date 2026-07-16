@@ -1,95 +1,87 @@
-# 🚀 Deploy a Three-Tier Application on AWS EKS using Terraform
+# 🚀 Three-Tier Todo App Deployment on AWS EKS with Terraform
 
-Welcome to the official repository for deploying a **Three-Tier Todo List Application** on **AWS EKS** using **Terraform** and **Kubernetes**! This project demonstrates how to build, containerize, and deploy a production-style architecture in the cloud using best DevOps practices.
+This repo walks through standing up a full three-tier To do List application on Amazon EKS, provisioned entirely with Terraform and deployed via Kubernetes. It's meant as a hands-on reference for real-world DevOps workflows — from infra provisioning to container orchestration.
 
----
+![Architecture overview diagram](images/architecture-overview.png)
 
-## 📁 Project Structure
+## 📁 Repo Layout
 
-```bash
+```
 3-tier-app-Deployment/
-├── backend/              # Node.js backend code
-├── frontend/             # React frontend code
-├── mongo/                # MongoDB Kubernetes manifests
-├── k8s_manifests/        # K8s manifests for frontend, backend, ingress
-└── terra-config/         # Terraform files to provision AWS infrastructure
-````
+├── backend/              # Node.js API
+├── frontend/             # React client
+├── mongo/                # MongoDB manifests
+├── k8s_manifests/        # Deployment, service & ingress manifests
+└── terra-config/         # Terraform infra code
+```
+
+## ⚙️ Stack
+
+- **Terraform** — infrastructure as code
+- **Amazon EKS** — Kubernetes control plane
+- **Amazon ECR** — container image registry
+- **Amazon S3** — remote Terraform state
+- **Kubernetes** — orchestration
+- **Helm** — installs the AWS Load Balancer Controller
+- **React / Node.js / MongoDB** — application layer
+
+## 📦 Before You Start
+
+Have these installed and ready to go:
+
+- [ ] AWS account with an IAM user that has `AdministratorAccess`
+- [ ] AWS CLI
+- [ ] Docker
+- [ ] Terraform
+- [ ] kubectl
+- [ ] eksctl
+- [ ] Helm
 
 ---
 
-## ⚙️ Technologies Used
+## 🔧 Walkthrough
 
-* **Terraform** (Infrastructure as Code)
-* **Amazon EKS** (Kubernetes Cluster)
-* **Amazon ECR** (Docker image registry)
-* **Amazon S3** (Terraform remote state storage)
-* **Kubernetes** (App deployment & orchestration)
-* **Helm** (Load Balancer controller installation)
-* **React + Node.js + MongoDB** (Application stack)
+### Step 1 — Grab the Code
 
----
-
-## 📦 Prerequisites
-
-Make sure you have the following installed and configured:
-
-* [ ] AWS Account + IAM user with AdministratorAccess
-* [ ] AWS CLI
-* [ ] Docker
-* [ ] Terraform
-* [ ] `kubectl`
-* [ ] `eksctl`
-* [ ] `helm`
-
----
-
-## 🔧 Setup Instructions
-
-### 1. Clone the Repo
+Clone the project locally and move into it:
 
 ```bash
-git clone https://github.com/Pravesh-Sudha/3-tier-app-Deployment.git
+git clone https://github.com/workinguser1012/Three-Tier-App-Deployment.git
 cd 3-tier-app-Deployment/
 ```
 
-### 2. Set Up AWS CLI
 
-Create an IAM user → Generate access key → Run:
+
+
+### Step 2 — Connect Your AWS CLI
+
+Create an IAM user, generate an access key pair, then authenticate locally:
 
 ```bash
 aws configure
 ```
 
-Use region `us-east-1` and output `json`.
+Set the region to `us-east-1` and output format to `json` when prompted.
 
----
 
-### 3. Create an S3 Bucket for Terraform State
+
+
+### Step 3 — Spin Up an S3 Bucket for Terraform State
+
+Terraform needs somewhere durable to keep its state file. Create the bucket and lock it down with versioning + encryption:
 
 ```bash
 aws s3api create-bucket \
-  --bucket pravesh-terra-state-bucket \
-  --region us-east-1 \
-  --create-bucket-configuration LocationConstraint=us-east-1
-
-aws s3api put-bucket-versioning \
-  --bucket pravesh-terra-state-bucket \
-  --versioning-configuration Status=Enabled
-
-aws s3api put-bucket-encryption \
-  --bucket pravesh-terra-state-bucket \
-  --server-side-encryption-configuration '{
-    "Rules": [{
-      "ApplyServerSideEncryptionByDefault": {
-        "SSEAlgorithm": "AES256"
-      }
-    }]
-  }'
+  --bucket three-tier-project-2026-storage \
+  --region us-east-1 
 ```
 
----
+![S3 bucket created with versioning enabled]  (<assets/Screenshot 2026-07-02 192656.png>)
 
-### 4. Provision AWS Infrastructure with Terraform
+
+### Step 4 — Provision the Infrastructure
+
+With state storage ready, let Terraform build out the AWS resources:
 
 ```bash
 cd terra-config/
@@ -97,53 +89,55 @@ terraform init
 terraform apply --auto-approve
 ```
 
----
+![Terraform apply output]  (<assets/Screenshot 2026-07-02 193221.png>)
 
-### 5. Push Docker Images to ECR
 
-Follow the "View push commands" from the ECR console for both:
+### Step 5 — Push Your Images to ECR
 
-* `three-tier-frontend`
-* `three-tier-backend`
+Grab the "View push commands" from the ECR console for both repositories — `three-tier-frontend` and `three-tier-backend` — and run them to build, tag, and push your images.
 
-Update image URIs in:
+Then point your manifests at the new image URIs:
 
-* `k8s_manifests/frontend_deployment.yml`
-* `k8s_manifests/backend_deployment.yml`
+- `k8s_manifests/frontend_deployment.yml`
+- `k8s_manifests/backend_deployment.yml`
 
----
+![Pushing Docker images to ECR] (<assets/Screenshot 2026-07-06 154917.png>)
 
-### 6. Configure and Deploy to EKS
+(<assets/Screenshot 2026-07-06 155825.png>)  
+(<assets/Screenshot 2026-07-06 155825.png>)
+
+
+### Step 6 — Deploy the App to EKS
+
+Point kubectl at your new cluster, create a dedicated namespace, and roll out the workloads:
 
 ```bash
 aws eks update-kubeconfig --region us-east-1 --name Three-tier-cloud
 kubectl create namespace workshop
 kubectl config set-context --current --namespace workshop
 
-# Apply app deployments
+# Deploy frontend and backend
 kubectl apply -f k8s_manifests/frontend-deployment.yaml -f k8s_manifests/frontend-service.yaml
 kubectl apply -f k8s_manifests/backend-deployment.yaml -f k8s_manifests/backend-service.yaml
 kubectl apply -f mongo/
 ```
 
----
+![Pods running in the workshop namespace]! (<assets/Screenshot 2026-07-07 170903.png>)
 
-### 7. Set Up Application Load Balancer (ALB) & Ingress
 
-#### a. IAM Policy and OIDC
+### Step 7 — Wire Up the Load Balancer & Ingress
+
+**a. IAM policy + OIDC provider**
 
 ```bash
 cd k8s_manifests/
 aws iam create-policy --policy-name AWSLoadBalancerControllerIAMPolicy --policy-document file://iam_policy.json
-```
 
-```bash
 curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
 sudo mv /tmp/eksctl /usr/local/bin
-eksctl utils associate-iam-oidc-provider --region=us-east-1 --cluster=Three-tier-cloud --approve
-```
 
-```bash
+eksctl utils associate-iam-oidc-provider --region=us-east-1 --cluster=Three-tier-cloud --approve
+
 eksctl create iamserviceaccount \
   --cluster=Three-tier-cloud \
   --namespace=kube-system \
@@ -154,7 +148,9 @@ eksctl create iamserviceaccount \
   --region=us-east-1
 ```
 
-#### b. Install Helm and Load Balancer Controller
+![IAM service account creation] (<assets/Screenshot 2026-07-07 171925.png>)
+
+**b. Install Helm and the Load Balancer Controller**
 
 ```bash
 sudo snap install helm --classic
@@ -168,48 +164,70 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   --set serviceAccount.name=aws-load-balancer-controller
 ```
 
----
+![Load Balancer Controller installed via Helm] (<assets/Screenshot 2026-07-07 180341.png>)
 
-### 8. Apply Ingress and Access App
+### Step 8 — Apply Ingress and Go Live
 
 ```bash
 kubectl apply -f k8s_manifests/full_stack_lb.yaml
 kubectl get ing -n workshop
 ```
 
-🎉 Visit the **ADDRESS** shown in the output to access your live application in the browser!
+Grab the `ADDRESS` from the output and open it in your browser — your app should be live! 🎉
+
+![Application running live in the browser]   (<assets/Screenshot 2026-07-07 192104.png>)
+(<assets/Screenshot 2026-07-08 165847.png>)
+
+
+
+### Step 9 — Automate It with a CI/CD Pipeline (GitHub Actions)
+
+Once the app was up and running manually, the next step was to stop doing all of this by hand. I set up a **GitHub Actions** workflow so that every push to `main` automatically builds fresh Docker images, pushes them to ECR, and rolls out the update to the EKS cluster.
+
+**a. Store your AWS credentials as repo secrets**
+
+In your GitHub repo, go to **Settings → Secrets and variables → Actions** and add:
+
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- `AWS_ACCOUNT_ID `
+- `TOKEN`
+
+
+**b. Add the workflow file**
+
+
+![GitHub Actions workflow run] (<assets/Screenshot 2026-07-16 112342.png>)
+
+**c. Push and watch it run**
+
+```bash
+git add .
+git commit -m "Add CI/CD pipeline"
+git push origin main
+```
+
+Head over to the **Actions** tab in your repo to watch the pipeline build the images, push them to ECR, and roll the update out to your EKS deployments — no manual `kubectl apply` needed anymore.
+
+
 
 ---
 
-## 🧹 Cleanup Instructions
+## 🧹 Tearing It Down
 
-After testing, you can tear everything down to avoid charges:
+Once you're done testing, clean up to avoid ongoing AWS charges:
 
 ```bash
-# Delete ECR images manually from AWS Console
+# Remove ECR images manually via the AWS Console first
 terraform destroy --auto-approve
-aws s3 rm s3://pravesh-terra-state-bucket/eks/terraform.tfstate
-# Then empty and delete the bucket via S3 console
+aws s3 rm s3://three-tier-project-2026-storage/eks/terraform.tfstate
+# Then empty and delete the bucket via the S3 console
 ```
 
 ---
 
-## ✨ Author
+## ✨ Refrences
 
-**Pravesh Sudha**
-AWS Community Builder – Containers | DevOps & Cloud Blogger
+**Pravesh Sudha** — (Help with Terraform Infrastrucutre Provison ) ( 3 Tier Application )
 
-* 💻 [Website](https://praveshsudha.com)
-* 🧠 [Blog](https://blog.praveshsudha.com)
-* 🐦 [Twitter](https://x.com/praveshstwt)
-* 💼 [LinkedIn](https://www.linkedin.com/in/pravesh-sudha/)
 
----
-
-## ⭐️ Support & Contribution
-
-If you find this project helpful, please consider giving it a ⭐ on GitHub!
-
-Pull requests and suggestions are welcome 🤝
-
----
