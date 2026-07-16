@@ -1,4 +1,4 @@
-# 🚀 Three-Tier Todo App Deployment on AWS EKS with Terraform
+# 🚀 Three-Tier To do App Deployment on AWS EKS with Terraform
 
 This repo walks through standing up a full three-tier To do List application on Amazon EKS, provisioned entirely with Terraform and deployed via Kubernetes. It's meant as a hands-on reference for real-world DevOps workflows — from infra provisioning to container orchestration.
 
