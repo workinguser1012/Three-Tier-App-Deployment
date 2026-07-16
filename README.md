@@ -182,7 +182,7 @@ Grab the `ADDRESS` from the output and open it in your browser — your app shou
 
 ![Application Adress](assets/12.png)
 
-[Application Live](assets/13.png)
+![Application Live](assets/13.png)
 
 
 
